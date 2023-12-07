@@ -21,6 +21,10 @@ namespace Hotel.Presentation.Customer.WindowsOrganisor
     public partial class PriceInfoWindow : Window
     {
         public PriceInfoUI PriceInfoUI { get; set; }
+        private int adultPrice;
+        private int childPrice;
+        private int discount;
+        private int adultAge;
         public PriceInfoWindow()
         {
             InitializeComponent();
@@ -40,26 +44,21 @@ namespace Hotel.Presentation.Customer.WindowsOrganisor
             if (IsFormatValid())
             {
 
-                if (MemberUI == null)
+                if (PriceInfoUI == null)
                 {
                     //Nieuw
                     //wegschrijven
-                    //TODO nrofmembers
-
-                    string name = NameTextBox.Text;
-                    string birthDate = BirthDayTextBox.Text;
-                    MemberUI = new MemberUI(name, birthDate);
-
-
+                    PriceInfoUI = new PriceInfoUI(adultPrice, childPrice, discount, adultAge);
                 }
 
                 else
                 {
                     //Update
                     //update DB
-                    MemberUI.Name = NameTextBox.Text;
-                    MemberUI.BirthDate = BirthDayTextBox.Text;
-
+                    PriceInfoUI.AdultPrice = adultPrice;
+                    PriceInfoUI.ChildPrice = childPrice;
+                    PriceInfoUI.Discount = discount;
+                    PriceInfoUI.AdultAge = adultAge;
 
                 }
                 DialogResult = true;
@@ -70,10 +69,7 @@ namespace Hotel.Presentation.Customer.WindowsOrganisor
         }
         public bool IsFormatValid()
         {
-            int adultPrice;
-            int childPrice;
-            int discount;
-            int adultAge;
+           
             if (!int.TryParse(AdultPriceTextBox.Text, out adultPrice))
             {
                 MessageBox.Show("Adult Price is not a number");
@@ -81,17 +77,27 @@ namespace Hotel.Presentation.Customer.WindowsOrganisor
             }
             else if (!int.TryParse(ChildPriceTextBox.Text, out childPrice))
             {
-                MessageBox.Show("Adult Price is not a number");
+                MessageBox.Show("Child Price is not a number");
                 return false;
             }
             else if (!int.TryParse(DiscountTextBox.Text, out discount))
             {
-                MessageBox.Show("Adult Price is not a number");
+                MessageBox.Show("Discount is not a number");
+                return false;
+            }
+            else if (discount > 100)
+            {
+                MessageBox.Show("Discount must be smaller than 100");
                 return false;
             }
             else if (!int.TryParse(AdultAgeTextBox.Text, out adultAge))
             {
-                MessageBox.Show("Adult Price is not a number");
+                MessageBox.Show("Adult age is not a number");
+                return false;
+            }
+            else if (adultPrice < 0 && childPrice < 0 && discount < 0 && adultAge < 0)
+            {
+                MessageBox.Show("Value can not be negative");
                 return false;
             }
             else
@@ -101,6 +107,11 @@ namespace Hotel.Presentation.Customer.WindowsOrganisor
             
        
 
+        }
+
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
         }
     }
 }
