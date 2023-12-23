@@ -8,22 +8,27 @@ namespace Hotel.Domain.Model
 {
     public class Registration
     {
+
         public int Id { get; set; }
-        public List<Member> Members { get; set; }
-        public List<Event> Events { get; set; }
-        public List<PriceInfo> PriceInfos { get; set; }
-        public Registration(List<Member> members, List<Event> events, List<PriceInfo> priceInfos)
+        public Dictionary<int, Member> Members { get; set; } = new Dictionary<int, Member>();
+        public Event Event { get; set; }
+        public Registration(Dictionary<int, Member> members, Event @event)
         {
             Members = members;
-            Events = events;
-            PriceInfos = priceInfos;
+            Event = @event;
         }
-        public Registration(int id, List<Member> members, List<Event> events, List<PriceInfo> priceInfos)
+
+        public Registration(int id, Dictionary<int, Member> members, Event @event)
         {
             Id = id;
             Members = members;
-            Events = events;
-            PriceInfos = priceInfos;
+            Event = @event;
+        }
+
+        public Registration(int id, Event @event)
+        {
+            Id = id;
+            Event = @event;
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using Hotel.Domain.Interfaces;
+﻿using Hotel.Domain.DTO;
+using Hotel.Domain.Interfaces;
+using Hotel.Domain.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,11 +13,18 @@ namespace Hotel.Domain.Managers
     {
         private readonly IEventRepository _eventRepository;
         private readonly IRegistrationRepository _registrationRepository;
+        private readonly IMembersRepository _memberRepository;
 
-        public RegistrationManager(IEventRepository eventRepository, IRegistrationRepository registrationRepository)
+        //public RegistrationManager(IRegistrationRepository registrationRepository)
+        //{
+        //    this._registrationRepository = registrationRepository;
+        //}
+
+        public RegistrationManager(IRegistrationRepository registrationRepository, IEventRepository eventRepository,  IMembersRepository memberRepository)
         {
             _eventRepository = eventRepository;
             _registrationRepository = registrationRepository;
+            _memberRepository = memberRepository;
         }
 
         //public async Task Register(Guid eventId, Guid userId)
@@ -25,6 +34,9 @@ namespace Hotel.Domain.Managers
         //    await _registrationRepository.Add(registration);
         //}
 
-
+        public List<Registration> GetRegistrations(int customerId)
+        {
+            return _registrationRepository.GetRegistrations(customerId).ToList();
+        }
     }
 }

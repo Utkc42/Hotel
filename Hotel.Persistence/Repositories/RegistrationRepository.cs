@@ -4,6 +4,7 @@ using Hotel.Persistence.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,11 +14,16 @@ namespace Hotel.Persistence.Repositories
     public class RegistrationRepository : IRegistrationRepository
     {
         private string connectionString;
+        private EventRepository eventRepository;
+        private MembersRepository membersRepository;
 
-        public RegistrationRepository(string connectionString)
+        public RegistrationRepository(string connectionString, EventRepository eventRepository, MembersRepository membersRepository)
         {
+            this.eventRepository = eventRepository;
             this.connectionString = connectionString;
+            this.membersRepository = membersRepository;
         }
+
 
         public int AddRegistration(Registration registration)
         {
@@ -35,9 +41,9 @@ namespace Hotel.Persistence.Repositories
                     {
                         cmd.Transaction = sqlTransaction;
                         cmd.CommandText = sql;
-                        cmd.Parameters.AddWithValue("@registrationId", registration.Events);
-                        cmd.Parameters.AddWithValue("@activityId", registration.Members);
-                        cmd.Parameters.AddWithValue("@priceInfo", registration.PriceInfos);
+                        //cmd.Parameters.AddWithValue("@registrationId", registration.Events);
+                        //cmd.Parameters.AddWithValue("@activityId", registration.Members);
+                        //cmd.Parameters.AddWithValue("@priceInfo", registration.PriceInfos);
                         int id = (int)cmd.ExecuteScalar();
                         registration.Id = id;
 
@@ -51,26 +57,38 @@ namespace Hotel.Persistence.Repositories
         }
 
 
-        public IReadOnlyList<Registration> GetRegistrations()
+        public IReadOnlyList<Registration> GetRegistrations(int customerId)
         {
             try
             {
                 List<Registration> registrations = new List<Registration>();
-
-                string sql = "select id, event, member from Registration;";
+                Registration registration = null;
+                string sql = "SELECT rd.id, registrationId, memberId, r.activityId\r\nFROM RegistrationDetails rd\r\njoin Registration r on r.id = rd.registrationId\r\nWHERE customerId = @customerId;";
 
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     conn.Open();
                     cmd.CommandText = sql;
+                    cmd.Parameters.AddWithValue("@customerId", customerId);
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            int id = Convert.ToInt32(reader["ID"]);
+                            int registrationDetailsId = (int)reader["id"];
+                            int registrationId = (int)reader["registrationId"];
 
-                            registrations.Add(new Registration(id, reader["event"], reader["member"]));
+                            if (registration == null || registration.Id != registrationId)
+                            {
+                                int activityId = (int)reader["activityId"];
+                                Event activity = eventRepository.GetEvent(activityId);
+                                registration = new Registration(registrationId, activity);
+                                registrations.Add(registration);
+                            }
+
+                            Member member = membersRepository.GetMember((int)reader["memberId"]);          //Maakt member aan
+                            registration.Members.Add(registrationDetailsId, member);                                          //Voeg member Toe
+
 
                         }
                     }
