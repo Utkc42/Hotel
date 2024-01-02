@@ -32,7 +32,6 @@ namespace Hotel.Presentation
         private ObservableCollection<CustomerUI> customerUIs = new ObservableCollection<CustomerUI>();
         private CustomerManager customerManager;
         private MemberManager membersManager;
-        private string conn = "Data Source=LAPTOP-UMGHNHQ1\\SQLEXPRESS;Initial Catalog=HotelDonderdag;Integrated Security=True";
         public MainWindow()
         {
             InitializeComponent();
@@ -48,6 +47,7 @@ namespace Hotel.Presentation
         {
             customerUIs = new ObservableCollection<CustomerUI>(customerManager.GetCustomers(SearchTextBox.Text).Select(x => new CustomerUI(x.Id, x.Name, x.Contact.Email, x.Contact.Address.ToString(), x.Contact.Phone, x.GetMembers().Count)).ToList());
             CustomerDataGrid.ItemsSource = customerUIs;
+        
         }
 
         private void MenuItemAddCustomer_Click(object sender, RoutedEventArgs e)
